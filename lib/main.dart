@@ -45,6 +45,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _namefield = TextEditingController();
+  final _editfield = TextEditingController();
   final _focusnode = FocusNode();
   int index=1;
   final box = Hive.box('contact');
@@ -68,6 +69,53 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   void _retrive(){
     keyList = box.keys.toList();
+  }
+  void _delete(var index){
+    box.deleteAt(index);
+  }
+  void _updateData(int index){
+    box.putAt(index, _editfield.text);
+  }
+  void showalertdialog(BuildContext context,int index){
+    showDialog(
+        context: context,
+        builder: (context){
+          return AlertDialog(
+            title: Text('Change Data'),
+            content: SizedBox(
+              width: 200,  // Set fixed width
+              height: 50,  // Set fixed height
+              child: TextField(
+                controller: _editfield,
+                maxLines: 1, // Ensures single-line input
+                textAlignVertical: TextAlignVertical.center, // Centers text vertically
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12), // Adjust inner spacing
+                ),
+                style: TextStyle(fontSize: 16, overflow: TextOverflow.ellipsis), // Truncate text if too long
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: (){
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cancel',style: TextStyle(color: Colors.blue.shade400),)
+              ),
+              TextButton(
+                  onPressed: (){
+                    _updateData(index);
+                    onpressed();
+                    Navigator.pop(context);
+
+                  },
+                  child: Text('Change Data',style: TextStyle(color: Colors.red.shade400))
+              )
+            ],
+          );
+        }
+    );
   }
   @override
   Widget build(BuildContext context) {
@@ -137,10 +185,25 @@ class _MyHomePageState extends State<MyHomePage> {
                         itemBuilder: (context,index)=>
                             Padding(
                               padding: const EdgeInsets.all(2.0),
-                              child: ListTile(
-                                title: Text(box.getAt(index)),
-                                tileColor: Colors.black12,
-                                textColor: Colors.purple,
+                              child: InkWell(
+                                onLongPress: (){
+                                  _editfield.text=box.getAt(index);
+                                  showalertdialog(context, index);
+
+                                },
+                                child: ListTile(
+                                  title: Text(box.getAt(index)),
+                                  tileColor: Colors.black12,
+                                  textColor: Colors.purple,
+                                  trailing: IconButton(
+                                      onPressed: (){
+                                        _delete(index);
+                                        _retrive();
+                                        onpressed();
+                                      },
+                                      icon: Icon(Icons.delete,color: Colors.red.shade400,)
+                                  ),
+                                ),
                               ),
                             )
                     ),
