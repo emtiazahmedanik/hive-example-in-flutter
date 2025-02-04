@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:hive_example/ContactDbBox.dart';
+import 'package:hive_example/models/contactModel.dart';
+import 'package:hive_example/secondScreen.dart';
 import 'package:sizer/sizer.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await Hive.openBox('contact');
+
+  Hive.registerAdapter(contactModelAdapter());
+  await ContactDbBox.init();
+
   runApp(const MyApp());
 }
 
@@ -82,19 +89,14 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: (context){
           return AlertDialog(
             title: Text('Change Data'),
-            content: SizedBox(
-              width: 200,  // Set fixed width
-              height: 50,  // Set fixed height
-              child: TextField(
-                controller: _editfield,
-                maxLines: 1, // Ensures single-line input
-                textAlignVertical: TextAlignVertical.center, // Centers text vertically
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12), // Adjust inner spacing
-                ),
-                style: TextStyle(fontSize: 16, overflow: TextOverflow.ellipsis), // Truncate text if too long
+            content: TextField(
+              controller: _editfield,
+              minLines: 1,
+              maxLines: 10,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
               ),
+              style: TextStyle(fontSize: 14, overflow: TextOverflow.ellipsis), // Truncate text if too long
             ),
             actions: [
               TextButton(
@@ -125,6 +127,14 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+        actions: [
+          IconButton(
+              onPressed: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>secondScreen()));
+              }, 
+              icon: Icon(Icons.navigate_next_outlined)
+          )
+        ],
       ),
       body: SafeArea(
           child: GestureDetector(
